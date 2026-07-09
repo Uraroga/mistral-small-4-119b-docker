@@ -10,7 +10,7 @@ mostra_uso() {
 Uso:
   ./scripts/verifica-risorse-cluster.sh [opzioni]
 
-Verifica le risorse locali e il dispositivo RPC remoto prima del primo
+Verifica le risorse locali e il dispositivo RPC remoto prima di un
 caricamento distribuito del modello.
 
 Opzioni:

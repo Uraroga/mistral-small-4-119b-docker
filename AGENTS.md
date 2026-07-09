@@ -4,10 +4,12 @@
 
 Questo repository è destinato a una pubblicazione pubblica su GitHub. Deve rimanere generico, leggibile e riutilizzabile da altri utenti.
 
-Il progetto eseguirà `Mistral-Small-4-119B-2603-UD-Q3_K_M` tramite `llama.cpp`, interamente dentro container Docker, usando due computer Ubuntu 24.04 collegati in rete locale:
+Il progetto esegue `Mistral-Small-4-119B-2603-UD-Q3_K_M` tramite `llama.cpp`, interamente dentro container Docker, usando due computer Ubuntu 24.04 collegati in rete locale:
 
 - un nodo principale, che esegue `llama-server` in container;
 - un nodo di supporto RPC, che esegue il server RPC di `llama.cpp` in container.
+
+Progetto testato con successo su `atlas5` e `argo3`: il modello in tre frammenti GGUF si è caricato correttamente con revisione `llama.cpp` `b9858` e primo contesto verificato di 4096 token. La configurazione consigliata per l'uso normale è 8192 token, da aumentare ulteriormente solo dopo verifiche di memoria e stabilità.
 
 I dettagli reali dell'installazione di sviluppo, inclusi IP, username, percorsi locali del modello, porte e parametri, devono essere configurabili tramite file `.env` e non devono essere incorporati direttamente negli script pubblici.
 
@@ -17,7 +19,8 @@ I dettagli reali dell'installazione di sviluppo, inclusi IP, username, percorsi 
 - Deve essere fornito solo un file `.env.example`, privo di segreti e valori personali.
 - Non inserire password, token, chiavi SSH o altri segreti nel repository.
 - IP, username, percorsi del modello, porte e parametri devono essere letti da configurazione, preferibilmente da `.env`.
-- Gli indirizzi e i percorsi reali dell'installazione di sviluppo non devono comparire in script, configurazioni operative o documentazione pubblica, salvo esempi chiaramente anonimizzati.
+- Gli indirizzi IP, gli username e i percorsi con informazioni private non devono comparire in script, configurazioni operative o documentazione pubblica.
+- I percorsi locali documentati nel README come configurazione collaudata devono restare esempi da adattare e non devono contenere credenziali, token o segreti.
 - Il modello GGUF non deve mai essere copiato dentro il repository o aggiunto a Git.
 
 ## Vincoli operativi

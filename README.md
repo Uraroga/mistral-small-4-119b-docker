@@ -8,9 +8,18 @@ Esecuzione locale di **Mistral-Small-4-119B-2603-UD-Q3_K_M** su due computer x86
 - CPU con profili differenti;
 - RAM distribuita tra un nodo principale e un nodo remoto.
 
-Stato del progetto: **Configurazione preparata per il primo test su atlas5 e argo3.**
+Stato del progetto: **Progetto testato con successo su atlas5 e argo3.**
 
-Il nuovo modello è più grande di quello usato nel progetto precedente. La configurazione iniziale è quindi prudente: 4096 token di contesto, un solo slot parallelo e nessuna ottimizzazione aggiuntiva non già prevista dagli script.
+Il modello **Mistral-Small-4-119B-2603-UD-Q3_K_M** si è caricato correttamente nella configurazione collaudata:
+
+- `atlas5` esegue `llama-server`;
+- `argo3` esegue `ggml-rpc-server`;
+- il collegamento RPC tra i due nodi è stato verificato;
+- il modello è suddiviso in tre frammenti GGUF;
+- la dimensione complessiva rilevata è circa **51 GiB**;
+- il primo caricamento verificato usa **4096 token di contesto**.
+
+La configurazione consigliata per l'uso normale è **8192 token di contesto**, mantenendo un solo slot parallelo e nessuna ottimizzazione aggiuntiva non già prevista dagli script. Aumentare ulteriormente il contesto solo dopo verifiche di memoria e stabilità.
 
 ## Architettura
 
@@ -51,7 +60,9 @@ Usarlo esclusivamente:
 - su una rete locale fidata;
 - con la porta RPC vincolata all'indirizzo LAN corretto;
 - senza port forwarding sul router;
-- senza pubblicazione su interfacce non necessarie.
+- senza inoltrare la porta `50052` dal router;
+- senza pubblicazione su interfacce non necessarie;
+- mai su reti pubbliche o non fidate.
 
 La configurazione di esempio pubblica l'API HTTP del nodo principale solo su:
 
@@ -74,11 +85,19 @@ Il modello atteso su `atlas5` è:
 Mistral-Small-4-119B-2603-UD-Q3_K_M
 ```
 
-La directory locale configurata per il primo test è:
+La directory locale del modello usata nella configurazione collaudata è:
 
 ```text
 /home/sergio/llama-cpp-models/Mistral-Small-4-119B-2603-UD-Q3_K_M
 ```
+
+La directory locale del repository usata nella configurazione collaudata è:
+
+```text
+/home/sergio/Progetti/mistral-small-4-119b-docker
+```
+
+Questi percorsi sono esempi reali della configurazione collaudata e devono essere adattati dagli altri utenti nel proprio `.env`.
 
 Il modello è suddiviso in tre file GGUF:
 
@@ -121,13 +140,19 @@ Sono supportati anche modelli GGUF composti da un solo file.
 ├── .env.example
 ├── .gitignore
 ├── AGENTS.md
-├── docker-compose.yml
 └── README.md
 ```
 
 Il file `.env` contiene la configurazione locale e non deve essere pubblicato. Il file `.env.example` contiene solo valori di esempio generici.
 
 Il modello GGUF, la cache RPC e le immagini Docker non fanno parte del repository.
+
+Il progetto non usa `docker compose`: il file Compose vuoto è stato rimosso. L'avvio viene gestito dagli script Bash separati:
+
+```text
+scripts/avvia-argo3.sh
+scripts/avvia-atlas5.sh
+```
 
 ## Configurazione principale
 
@@ -141,9 +166,9 @@ MODEL_HOST_DIR=/home/sergio/llama-cpp-models/Mistral-Small-4-119B-2603-UD-Q3_K_M
 MODEL_CONTAINER_DIR=/models
 MODEL_FILENAME=Mistral-Small-4-119B-2603-UD-Q3_K_M-00001-of-00003.gguf
 
-CONTEXT_SIZE=4096
+CONTEXT_SIZE=8192
 DEFAULT_MAX_TOKENS=2048
-FIT_CONTEXT=4096
+FIT_CONTEXT=8192
 SERVER_PARALLEL=1
 SERVER_CACHE_RAM_MIB=0
 SERVER_CACHE_PROMPT=false
@@ -258,6 +283,32 @@ Avviare `llama-server` su `atlas5`:
 
 Per esecuzioni automatizzate consapevoli, gli script supportano `--yes`.
 
+## Verifica rapida del server
+
+Dopo il caricamento del modello, sul nodo principale verificare lo stato del server locale:
+
+```bash
+curl -s http://127.0.0.1:8080/health
+```
+
+Esempio essenziale per l'API compatibile OpenAI:
+
+```bash
+curl -s http://127.0.0.1:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Mistral-Small-4-119B-2603",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Spiega in italiano che cosa significa eseguire un modello distribuito su due computer."
+      }
+    ],
+    "temperature": 0.7,
+    "max_tokens": 300
+  }'
+```
+
 ## Container e immagini
 
 Container usati da questa copia:
@@ -318,7 +369,7 @@ sudo docker stop mistral-small-4-rpc
 - Non modificare i profili CPU senza verificare i flag reali della CPU.
 - Non esporre la porta RPC verso Internet.
 - Non avviare contemporaneamente due progetti con le stesse porte.
-- Non dichiarare riuscito il caricamento finché il primo test reale non è stato completato.
+- Non cambiare la configurazione di rete senza verificare prima l'esposizione effettiva delle porte.
 
 ## Licenza
 

@@ -270,7 +270,7 @@ valida_configurazione() {
   esac
 
   if [[ "$SPLIT_MODE" != "layer" ]]; then
-    errore "per questo primo test SPLIT_MODE deve essere obbligatoriamente layer, rilevato: $SPLIT_MODE"
+    errore "per questa configurazione SPLIT_MODE deve essere obbligatoriamente layer, rilevato: $SPLIT_MODE"
     exit 1
   fi
 
